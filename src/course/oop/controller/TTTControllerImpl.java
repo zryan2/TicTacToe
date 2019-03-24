@@ -1,0 +1,156 @@
+package course.oop.controller;
+
+import course.oop.controller.TTTControllerInterface;
+import course.oop.objects.Board;
+import course.oop.objects.Player;
+
+import java.io.Serializable;
+import java.util.Timer;
+
+public class TTTControllerImpl implements TTTControllerInterface, Serializable {
+
+	private boolean vsHuman;
+	private int timeout;
+	private Board board;
+	private Player player1;
+	private Player player2;
+	private Player playerComp;
+
+	private int playerCount;
+	private int playerTurn;
+	// Constructor
+	public TTTControllerImpl() {
+
+		playerCount = 0;
+		playerTurn = 1;
+		System.out.println(playerCount);
+	}
+	
+	@Override
+	public void startNewGame(int numPlayers, int timeoutInSecs) {
+		playerCount = numPlayers;
+		switch (numPlayers) {
+		case 1:
+			vsHuman = false;
+			playerComp = new Player("Computer", "C");
+			break;
+		case 2:
+			vsHuman = true;
+			playerComp = new Player("Computer", "C");
+			break;
+		default:
+			System.out.println("Invalid");
+			return;
+		}
+		
+//		TODO Timeout system
+		if(timeoutInSecs == 0) {
+			timeout = 999;
+		}else
+			timeout = timeoutInSecs;
+		// Creates a board object
+		board = new Board(3);
+		System.out.println("New game started with " + numPlayers + " players." +"\n");
+	}
+
+	@Override
+	public void createPlayer(String username, String marker, int playerNum) {
+		if(playerNum == 1 || playerNum == 2) {
+			if (playerNum == 1) {
+				player1 = new Player(username, marker);
+				player2 = new Player("Filler", "Filler");
+			}else {
+				player2 = new Player(username, marker);
+			}
+			System.out.println(username + " has been created.");
+		}else {
+			System.out.println("Invalid player");
+		}
+		
+	}
+
+	@Override
+	public boolean setSelection(int row, int col, int currentPlayer) {
+		if(currentPlayer == 1)
+			return board.placePiece(row,col, player1.getMarker());
+		else if (currentPlayer == 2) {
+			if(vsHuman) {
+				return board.placePiece(row, col, player2.getMarker());
+			}else
+				return board.placePiece(row,col, playerComp.getMarker());
+		}
+		return false;
+	}
+
+	@Override
+	public int determineWinner() {
+		String winMarker = board.checkWinner();
+		System.out.println(winMarker);
+		if(winMarker == null)
+			return 0;
+		else if(winMarker.equals(player1.getMarker()))
+			return 1;
+		else if(vsHuman) {
+			if(winMarker.equals(player2.getMarker()))
+				return 2;
+		}else if(!vsHuman) {
+			if(winMarker.equals(playerComp.getMarker()))
+				return 2;
+		}
+		return 3;
+	}
+
+	@Override
+	public String getGameDisplay() {
+		String results = board.toString();
+		return results;
+	}
+	
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public int getPlayerCount(){return playerCount;}
+
+	public void newGame(){
+		board = new Board(3);
+		playerTurn = 1;
+	}
+
+	public String getPlayerOneName(){
+		return player1.getUsername();
+	}
+	public String getPlayerOneMarker(){
+		return player1.getMarker();
+	}
+	public void setPlayerOneName(String newName){
+		player1.setUsername(newName);
+	}
+	public void setPlayerOneMarker(String newMarker){
+		player1.setMarker(newMarker);
+	}
+	public String getPlayerTwoName(){
+		return player2.getUsername();
+	}
+	public String getPlayerTwoMarker(){
+		return player2.getMarker();
+	}
+	public void setPlayerTwoName(String newName){
+		player2.setUsername(newName);
+	}
+	public void setPlayerTwoMarker(String newMarker){
+		player2.setMarker(newMarker);
+	}
+
+	public int getPlayerTurn(){
+		return playerTurn;
+	}
+
+	public void nextPlayerTurn(){
+		if(playerTurn == 1){
+			playerTurn = 2;
+		}else{
+			playerTurn = 1;
+		}
+	}
+}
