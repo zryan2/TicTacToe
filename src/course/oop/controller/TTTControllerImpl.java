@@ -141,6 +141,26 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	public void setPlayerTwoMarker(String newMarker){
 		player2.setMarker(newMarker);
 	}
+	public void playerWin(int playerNum){
+		if(playerNum == 1)
+			player1.playerWin();
+		else {
+			if(playerCount == 2)
+				player2.playerWin();
+			else
+				playerComp.playerWin();
+		}
+	}
+	public int getPlayerWin(int playerNum){
+		if(playerNum == 1)
+			return player1.getWinCount();
+		else {
+			if(playerCount == 2)
+				return player2.getWinCount();
+			else
+				return playerComp.getWinCount();
+		}
+	}
 
 	public int getPlayerTurn(){
 		return playerTurn;

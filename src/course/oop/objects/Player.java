@@ -6,10 +6,12 @@ public class Player implements Serializable {
 	
 	private String username;
 	private String marker;
+	private int winCount;
 	
 	public Player(String username, String marker) {
 		this.username = username;
 		this.marker = marker;
+		this.winCount = 0;
 	}
 	
 	public String getUsername() {
@@ -24,5 +26,11 @@ public class Player implements Serializable {
 	}
 	public void setMarker(String marker) {
 		this.marker = marker;
+	}
+	public void playerWin(){
+		winCount++;
+	}
+	public int getWinCount(){
+		return this.winCount;
 	}
 }

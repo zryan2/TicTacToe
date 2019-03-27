@@ -4,6 +4,9 @@ import course.oop.controller.TTTControllerImpl;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.scene.text.Text;
 
 import java.io.*;
@@ -104,7 +107,6 @@ public class MainView {
                 int playerNum = Integer.parseInt(modeGroup.getSelectedToggle().getUserData().toString());
                 int timeoutNum = Integer.parseInt(timeOut.getText());
                 controller.startNewGame(playerNum, timeoutNum);
-//                 TODO: Switch view to Create Players
                 root.setCenter(createPlayerView());
             }else{
                 System.out.println("Please enter integers");
@@ -174,11 +176,23 @@ public class MainView {
 
     public BorderPane playGameView(){
         BorderPane bPane = new BorderPane();
+
+        HBox topBar = new HBox(5);
         Button quitBtn = new Button("Quit Game");
         quitBtn.setOnAction((event)->{
             controller.newGame();
             root.setCenter(buildMenu());
         });
+
+        // Path to audio files
+        final String loseSoundFile = "src/course/oop/media/lose.mp3";
+        final String winSoundFile = "src/course/oop/media/win.mp3";
+        Media loseSound = new Media(new File(loseSoundFile).toURI().toString());
+        Media winSound = new Media(new File(winSoundFile).toURI().toString());
+        MediaPlayer loseMedia = new MediaPlayer(loseSound);
+        MediaPlayer winMedia = new MediaPlayer(winSound);
+        MediaView loseMediaView = new MediaView(loseMedia);
+        MediaView winMediaView = new MediaView(winMedia);
 
         Text p1Turn = new Text(controller.getPlayerOneName() + "'s Turn");
         Text p2Turn = new Text(controller.getPlayerTwoName() + "'s Turn");
@@ -196,11 +210,18 @@ public class MainView {
         VBox selectionBox = new VBox(5);
         selectionBox.getChildren().addAll(turnPane, new Label("Row"), rowTF, new Label("Column"), colTF, submitBtn);
 
-        bPane.setTop(quitBtn);
+        VBox playerOneDisplay = setPlayerDisplay(1);
+        VBox playerTwoDisplay = setPlayerDisplay(2);
+
+        topBar.getChildren().addAll(quitBtn, winMediaView, loseMediaView);
+        bPane.setTop(topBar);
         bPane.setBottom(selectionBox);
         bPane.setCenter(new Text(controller.getGameDisplay()));
-
+        bPane.setLeft(playerOneDisplay);
+        bPane.setRight(playerTwoDisplay);
         submitBtn.setOnAction((event)->{
+
+
             String rowText = rowTF.getText();
             String colText = colTF.getText();
 
@@ -226,15 +247,24 @@ public class MainView {
                     if(winnerNum == 1){
                         winnerBox.getChildren().clear();
                         winnerBox.getChildren().addAll(p1Win, playAgainBtn);
+                        controller.playerWin(1);
+                        VBox playerDisplay = setPlayerDisplay(1);
+                        winMedia.play();
+                        bPane.setLeft(playerDisplay);
                         bPane.setBottom(winnerBox);
                     }else if(winnerNum == 2){
                         winnerBox.getChildren().clear();
                         winnerBox.getChildren().addAll(p2Win, playAgainBtn);
+                        controller.playerWin(2);
+                        VBox playerDisplay = setPlayerDisplay(2);
+                        bPane.setRight(playerDisplay);
                         bPane.setBottom(winnerBox);
+                        winMedia.play();
                     }else if(winnerNum == 3){
                         winnerBox.getChildren().clear();
                         winnerBox.getChildren().addAll(new Label("It's a Tie!"), playAgainBtn);
                         bPane.setBottom(winnerBox);
+                        loseMedia.play();
                     }
 
                     if(winnerNum == 0) {
@@ -248,10 +278,15 @@ public class MainView {
                                 col = (int) (Math.random() * 3);
                                 compMove = controller.setSelection(row, col, 2);
                             }
+                            // If computer wins
                             if (controller.determineWinner() == 2) {
                                 winnerBox.getChildren().clear();
                                 winnerBox.getChildren().addAll(new Text("Computer is the Winner!"), playAgainBtn);
+                                controller.playerWin(2);
+                                VBox playerDisplay = setPlayerDisplay(2);
+                                bPane.setRight(playerDisplay);
                                 bPane.setBottom(winnerBox);
+                                loseMedia.play();
                             }
                             bPane.setCenter(new Text(controller.getGameDisplay()));
                         }
@@ -273,6 +308,22 @@ public class MainView {
 
         });
         return bPane;
+    }
+
+    private VBox setPlayerDisplay(int playerNum){
+        VBox playerDisplay = new VBox(5);
+        if(playerNum == 1) {
+            playerDisplay.getChildren().addAll(new Label("Player 1"), new Text("Name: " + controller.getPlayerOneName()), new Text("Marker: " + controller.getPlayerOneMarker()),
+                    new Text("Win(s): " + controller.getPlayerWin(1)));
+        }else {
+            if (controller.getPlayerCount() == 2)
+                playerDisplay.getChildren().addAll(new Label("Player 2"), new Text("Name: " + controller.getPlayerTwoName()),
+                        new Text("Marker: " + controller.getPlayerTwoMarker()), new Text("Win(s): " + controller.getPlayerWin(2)));
+            else {
+                playerDisplay.getChildren().addAll(new Label("Player 2"), new Text("Name: Computer"), new Text("Marker: C"), new Text("Win(s): " + controller.getPlayerWin(2)));
+            }
+        }
+        return playerDisplay;
     }
 
     public BorderPane editPlayerView() {
