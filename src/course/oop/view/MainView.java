@@ -39,6 +39,7 @@ public class MainView {
         Button createBtn = new Button("Create Game");
         Button startBtn = new Button("Start Game");
         Button editBtn = new Button("Edit Players");
+        Button changeModeBtn = new Button("Change Game Mode");
         Button quitBtn = new Button("Quit Game");
 
         gPane.add(createBtn,0,0);
@@ -46,8 +47,9 @@ public class MainView {
         if(playerCount == 1 || playerCount == 2) {
             gPane.add(startBtn, 0, 1);
             gPane.add(editBtn, 0, 2);
+            gPane.add(changeModeBtn, 0, 3);
         }
-        gPane.add(quitBtn,0,3);
+        gPane.add(quitBtn,0,4);
 
         // Create Game Button
         createBtn.setOnAction((event)->{
@@ -55,7 +57,6 @@ public class MainView {
         });
         // Start Game Button
         startBtn.setOnAction((event)->{
-
             root.setCenter(playGameView());
             controller.newGame();
         });
@@ -63,6 +64,10 @@ public class MainView {
         // Edit Players Button
         editBtn.setOnAction((event)->{
             root.setCenter(editPlayerView());
+        });
+
+        changeModeBtn.setOnAction((event)->{
+            root.setCenter(changeGameMode());
         });
         // Quit Button
         quitBtn.setOnAction((event)->{
@@ -158,13 +163,13 @@ public class MainView {
 
         submitBtn.setOnAction((event)->{
             if(controller.getPlayerCount() == 1){
-                if(p1TF.getText().length() >= 1 && p1MarkerTF.getText().length() == 1){
+                if(p1TF.getText().length() >= 1  && p1MarkerTF.getText().length()>=1 && !p1MarkerTF.getText().equals("C")){
                     // Create Player 1
                     controller.createPlayer(p1TF.getText(), p1MarkerTF.getText(), 1);
                     root.setCenter(buildMenu());
                 }
             }else if(controller.getPlayerCount() == 2){
-                if(p1TF.getText().length() >= 1 && p1MarkerTF.getText().length() == 1 && p2TF.getText().length() >= 1 && p2MarkerTF.getText().length() == 1){
+                if(p1TF.getText().length() >= 1 && p2TF.getText().length() >= 1  && p1MarkerTF.getText().length()>=1  && p2MarkerTF.getText().length()>=1 && !p1MarkerTF.getText().equals(p2MarkerTF.getText())){
                     controller.createPlayer(p1TF.getText(), p1MarkerTF.getText(), 1);
                     controller.createPlayer(p2TF.getText(), p2MarkerTF.getText(), 2);
                     root.setCenter(buildMenu());
@@ -310,6 +315,7 @@ public class MainView {
         return bPane;
     }
 
+    // Displays player information during game
     private VBox setPlayerDisplay(int playerNum){
         VBox playerDisplay = new VBox(5);
         if(playerNum == 1) {
@@ -351,10 +357,12 @@ public class MainView {
 
         Pane p1LabelPane = new Pane(new Label("Player 1: " + controller.getPlayerOneName()));
         Pane p2LabelPane = new Pane(new Label("Player 2: " + controller.getPlayerTwoName()));
-        p1Info.getChildren().addAll(p1LabelPane, new Label("Player Name"), p1TF, new Label("Player Marker (1 char)"),
+        Pane p1MarkerPane = new Pane (new Label("Player Marker: " + controller.getPlayerOneMarker()));
+        Pane p2MarkerPane = new Pane (new Label("Player Marker: " + controller.getPlayerTwoMarker()));
+        p1Info.getChildren().addAll(p1LabelPane, new Label("Player Name"), p1TF, p1MarkerPane,
                 p1MarkerTF, editP1Btn);
         if (playerCount == 2){
-            p2Info.getChildren().addAll(p2LabelPane, new Label("Player Name"), p2TF, new Label("Player Marker (1 char)"),
+            p2Info.getChildren().addAll(p2LabelPane, new Label("Player Name"), p2TF, p2MarkerPane,
                     p2MarkerTF, editP2Btn);
         }
 
@@ -366,25 +374,69 @@ public class MainView {
             bPane.setCenter(p1Info);
         }
         editP1Btn.setOnAction((event)->{
-            if(p1TF.getText().length() >= 1 && p1MarkerTF.getText().length() == 1) {
+            if(p1TF.getText().length() >= 1 && !p1MarkerTF.getText().equals("C") && !p1MarkerTF.getText().equals(p2MarkerTF.getText()) && p1MarkerTF.getText().length()>=1) {
                 controller.setPlayerOneName(p1TF.getText());
                 controller.setPlayerOneMarker(p1MarkerTF.getText());
                 p1LabelPane.getChildren().clear();
                 p1LabelPane.getChildren().add(new Label("Player 1: " + controller.getPlayerOneName()));
+                p1MarkerPane.getChildren().clear();
+                p1MarkerPane.getChildren().add(new Label("Player Marker: " + controller.getPlayerOneMarker()));
             }
         });
 
         editP2Btn.setOnAction((event)->{
-            if(p2TF.getText().length() >= 1 && p2MarkerTF.getText().length() == 1) {
+            if(p2TF.getText().length() >= 1 && !p1MarkerTF.getText().equals(p2MarkerTF.getText()) && p2MarkerTF.getText().length()>=1) {
                 controller.setPlayerTwoName(p2TF.getText());
                 controller.setPlayerTwoMarker(p2MarkerTF.getText());
                 p2LabelPane.getChildren().clear();
                 p2LabelPane.getChildren().add(new Label("Player 2: " + controller.getPlayerTwoName()));
+                p2MarkerPane.getChildren().clear();
+                p2MarkerPane.getChildren().add(new Label("Player Marker: " + controller.getPlayerTwoMarker()));
             }
         });
         return bPane;
     }
+    public BorderPane changeGameMode(){
+        BorderPane bPane = new BorderPane();
+        Button vsPlayerBtn = new Button("Vs. Player");
+        Button vsComBtn = new Button("Vs. Computer");
+        Button ultimateBtn = new Button("Ultimate Tic Tac Toe");
 
+        Button backBtn = new Button("Back");
+        backBtn.setOnAction((event) -> {
+            root.setCenter(buildMenu());
+        });
+
+        GridPane gameModeDisplay = new GridPane();
+        gameModeDisplay.add(vsPlayerBtn, 0, 0);
+        gameModeDisplay.add(vsComBtn, 1, 0);
+        gameModeDisplay.add(ultimateBtn, 2, 0);
+
+        vsPlayerBtn.setOnAction((event)->{
+           controller.changeGameMode(1);
+           if(controller.getPlayerTwo()== null){
+               System.out.println("Player 2 is non existent :(");
+               controller.createPlayer("Filler", "Filler", 2);
+               root.setCenter(editPlayerView());
+           }else{
+               root.setCenter(buildMenu());
+           }
+        });
+
+        vsComBtn.setOnAction((event)->{
+           controller.changeGameMode(2);
+           root.setCenter(buildMenu());
+        });
+
+        ultimateBtn.setOnAction((event)->{
+            controller.changeGameMode(3);
+            root.setCenter(buildMenu());
+        });
+
+        bPane.setTop(backBtn);
+        bPane.setCenter(gameModeDisplay);
+        return bPane;
+    }
     public BorderPane getRoot(){
         root.setAlignment(buildMenu(), Pos.CENTER);
         root.setTop(new Label("Tic Tac Toe"));

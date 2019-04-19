@@ -18,9 +18,11 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 
 	private int playerCount;
 	private int playerTurn;
+
+	private int gameMode;
 	// Constructor
 	public TTTControllerImpl() {
-
+		gameMode = 1;
 		playerCount = 0;
 		playerTurn = 1;
 		System.out.println(playerCount);
@@ -58,7 +60,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 		if(playerNum == 1 || playerNum == 2) {
 			if (playerNum == 1) {
 				player1 = new Player(username, marker);
-				player2 = new Player("Filler", "Filler");
+//				player2 = new Player("Filler", "Filler");
 			}else {
 				player2 = new Player(username, marker);
 			}
@@ -113,7 +115,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	public int getPlayerCount(){return playerCount;}
 
 	public void newGame(){
-		board = new Board(3);
+		board.newGame();
 		playerTurn = 1;
 	}
 
@@ -141,6 +143,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	public void setPlayerTwoMarker(String newMarker){
 		player2.setMarker(newMarker);
 	}
+	public Player getPlayerTwo(){return player2;};
 	public void playerWin(int playerNum){
 		if(playerNum == 1)
 			player1.playerWin();
@@ -172,5 +175,29 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 		}else{
 			playerTurn = 1;
 		}
+	}
+
+	public void changeGameMode(int gameMode){
+		switch(gameMode){
+			case 1:
+				// Against Player
+				System.out.println("vs Player Mode");
+				vsHuman = true;
+				playerCount = 2;
+				break;
+			case 2:
+				// Against Computer
+				System.out.println("vs Computer Mode");
+				vsHuman = false;
+				playerCount = 1;
+				break;
+			case 3:
+				// Ultimate Tic Tac Toe
+				break;
+			default:
+				System.out.println("Invalid Game Mode");
+		}
+		this.gameMode = gameMode;
+
 	}
 }

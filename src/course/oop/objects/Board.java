@@ -13,7 +13,7 @@ public class Board implements Serializable {
 	
 	public boolean placePiece(int row, int col, String marker) {
 		// If column and row are between 0 and size of board
-		if(row < board.length && row >= 0 && col < board.length && row >= 0) {
+		if(row < board.length && row >= 0 && col < board.length && col >= 0) {
 			if(board[row][col] == null) {
 				board[row][col] = marker;
 				boardFilled++;
@@ -87,6 +87,15 @@ public class Board implements Serializable {
 			return true;
 		return false;
 	}
+
+	public void newGame(){
+	    for(int i = 0; i < board.length; i++){
+	        for(int j = 0; j < board[i].length; j++){
+	            board[i][j] = null;
+            }
+        }
+	    boardFilled = 0;
+    }
 	@Override
 	public String toString() {
 		String results = new String();
