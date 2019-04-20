@@ -22,6 +22,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	private int playerTurn;
 
 	private int gameMode;
+	private int boardSize;
 	// Constructor
 	public TTTControllerImpl() {
 		gameMode = 1;
@@ -37,6 +38,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 		case 1:
 			vsHuman = false;
 			playerComp = new Player("Computer", "C");
+			player2 = new Player("Player2", "Player2");
 			break;
 		case 2:
 			vsHuman = true;
@@ -54,6 +56,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 			timeout = timeoutInSecs;
 		// Creates a board object
 		board = new Board(3);
+		boardSize = 3;
 		System.out.println("New game started with " + numPlayers + " players." +"\n");
 	}
 
@@ -154,7 +157,12 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 			ultimateBoard.newBoard();
 		playerTurn = 1;
 	}
-
+	public int getBoardSize(){
+		return boardSize;
+	}
+	public void setBoardSize(int size){
+		boardSize = size;
+	}
 	public String getPlayerOneName(){
 		return player1.getUsername();
 	}

@@ -1,6 +1,7 @@
 package course.oop.view;
 
 import course.oop.controller.TTTControllerImpl;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -83,6 +84,8 @@ public class MainView {
             catch (IOException e) {}
             System.exit(20);
         });
+        gPane.setAlignment(Pos.CENTER);
+        gPane.setVgap(8);
         return gPane;
     }
 
@@ -201,8 +204,9 @@ public class MainView {
         MediaView winMediaView = new MediaView(winMedia);
 
         Text p1Turn = new Text(controller.getPlayerOneName() + "'s Turn");
-        Text p2Turn = new Text(controller.getPlayerTwoName() + "'s Turn");
         Text p1Win = new Text(controller.getPlayerOneName() + " is the Winner!");
+
+        Text p2Turn = new Text(controller.getPlayerTwoName() + "'s Turn");
         Text p2Win = new Text(controller.getPlayerTwoName() + " is the Winner!");
         Pane turnPane = new Pane();
         turnPane.getChildren().add(p1Turn);
@@ -231,12 +235,16 @@ public class MainView {
         bPane.setBottom(selectionBox);
         if(gameMode == 1 || gameMode==2) {
             bPane.setCenter(new Text(controller.getGameDisplay()));
+            bPane.setAlignment(new Text(controller.getGameDisplay()),Pos.CENTER);
         }else if(gameMode == 3){
             bPane.setCenter(displayUltimateBoard());
+            bPane.setAlignment(displayUltimateBoard(),Pos.CENTER);
         }
         bPane.setLeft(playerOneDisplay);
         bPane.setRight(playerTwoDisplay);
-
+        selectionBox.setAlignment(Pos.CENTER_LEFT);
+        winnerBox.setAlignment(Pos.CENTER);
+        bPane.setPadding(new Insets(15, 15,15,15));
         // Submit Button
         submitBtn.setOnAction((event)-> {
             String rowText = rowTF.getText();
@@ -245,15 +253,17 @@ public class MainView {
                 //Get Row and Col from textfields
                 int rowNum = Integer.parseInt(rowText);
                 int colNum = Integer.parseInt(colText);
-
+                boolean placePieceSuccessful = false;
                 // Game Mode: Regular Tic-Tac-Toe (vs Comp & vs Player)
                 if(gameMode == 1 || gameMode == 2){
-                    if (controller.setSelection(rowNum, colNum, controller.getPlayerTurn())) {
+                    placePieceSuccessful = controller.setSelection(rowNum, colNum, controller.getPlayerTurn());
+                    if (placePieceSuccessful) {
                         // Changes player turn
                         if (controller.getPlayerCount() == 2) {
                             controller.nextPlayerTurn();
                         }
                         bPane.setCenter(new Text(controller.getGameDisplay()));
+
                     } else {
                         System.out.println("Invalid move");
                     }
@@ -262,7 +272,8 @@ public class MainView {
                     String boardNumText = boardNumTF.getText();
                     if(boardNumText.matches("\\d")){
                         int boardNum = Integer.parseInt(boardNumText);
-                        if(controller.placeUltimatePiece(rowNum,colNum,controller.getPlayerTurn(),boardNum)){
+                        placePieceSuccessful = controller.placeUltimatePiece(rowNum, colNum, controller.getPlayerTurn(), boardNum);
+                        if(placePieceSuccessful){
                             // Changes player turn
                             if (controller.getPlayerCount() == 2) {
                                 controller.nextPlayerTurn();
@@ -284,55 +295,60 @@ public class MainView {
 
                 // Check Winner
                 // Check if there is a winner
-                int winnerNum = controller.determineWinner();
-                if (winnerNum == 1) { // Winner is player 1
-                    winnerBox.getChildren().clear();
-                    winnerBox.getChildren().addAll(p1Win, playAgainBtn);
-                    controller.playerWin(1);
-                    VBox playerDisplay = setPlayerDisplay(1);
-                    winMedia.play();
-                    bPane.setLeft(playerDisplay);
-                    bPane.setBottom(winnerBox);
-                } else if (winnerNum == 2) { // Winner is player 2
-                    winnerBox.getChildren().clear();
-                    winnerBox.getChildren().addAll(p2Win, playAgainBtn);
-                    controller.playerWin(2);
-                    VBox playerDisplay = setPlayerDisplay(2);
-                    bPane.setRight(playerDisplay);
-                    bPane.setBottom(winnerBox);
-                    winMedia.play();
-                } else if (winnerNum == 3) { // Tie
-                    winnerBox.getChildren().clear();
-                    winnerBox.getChildren().addAll(new Label("It's a Tie!"), playAgainBtn);
-                    bPane.setBottom(winnerBox);
-                    loseMedia.play();
-                }
+                if(placePieceSuccessful) {
+                    int winnerNum = controller.determineWinner();
+                    if (winnerNum == 1) { // Winner is player 1
+                        winnerBox.getChildren().clear();
+                        winnerBox.getChildren().addAll(p1Win, playAgainBtn);
+                        controller.playerWin(1);
+                        VBox playerDisplay = setPlayerDisplay(1);
+                        winMedia.play();
+                        bPane.setLeft(playerDisplay);
+                        bPane.setBottom(winnerBox);
+                    } else if (winnerNum == 2) { // Winner is player 2
+                        winnerBox.getChildren().clear();
+                        winnerBox.getChildren().addAll(p2Win, playAgainBtn);
+                        controller.playerWin(2);
+                        VBox playerDisplay = setPlayerDisplay(2);
+                        bPane.setRight(playerDisplay);
+                        bPane.setBottom(winnerBox);
+                        winMedia.play();
+                    } else if (winnerNum == 3) { // Tie
+//                    winnerBox.getChildren().clear();
+//                    winnerBox.getChildren().addAll(new Label("It's a Tie!"), playAgainBtn);
+//                    bPane.setBottom(winnerBox);
+//                    loseMedia.play();
+                        bPane.setBottom(tieBreaker(bPane, winnerBox, playAgainBtn));
+                    }
 
-                // If no winner
-                if (winnerNum == 0) {
-                    // Computer plays
-                    if(gameMode == 1 || gameMode == 2) {
-                        if (controller.getPlayerCount() == 1) {
-                            int row = (int) (Math.random() * 3);
-                            int col = (int) (Math.random() * 3);
-                            boolean compMove = controller.setSelection(row, col, 2);
-                            System.out.println("Computer's Turn!: " + compMove + " row " + row + " col " + col);
-                            while (!compMove) {
-                                row = (int) (Math.random() * 3);
-                                col = (int) (Math.random() * 3);
-                                compMove = controller.setSelection(row, col, 2);
+                    // If no winner
+                    if (winnerNum == 0) {
+                        // Computer plays
+                        if (gameMode == 1 || gameMode == 2) {
+                            if (controller.getPlayerCount() == 1) {
+                                int row = (int) (Math.random() * 3);
+                                int col = (int) (Math.random() * 3);
+                                boolean compMove = controller.setSelection(row, col, 2);
+                                System.out.println("Computer's Turn!: " + compMove + " row " + row + " col " + col);
+                                while (!compMove) {
+                                    row = (int) (Math.random() * 3);
+                                    col = (int) (Math.random() * 3);
+                                    compMove = controller.setSelection(row, col, 2);
+                                }
+                                // If computer wins
+                                if (controller.determineWinner() == 2) {
+                                    winnerBox.getChildren().clear();
+                                    winnerBox.getChildren().addAll(new Text("Computer is the Winner!"), playAgainBtn);
+                                    controller.playerWin(2);
+                                    VBox playerDisplay = setPlayerDisplay(2);
+                                    bPane.setRight(playerDisplay);
+                                    bPane.setBottom(winnerBox);
+                                    loseMedia.play();
+                                }else if(controller.determineWinner() == 3){
+                                    bPane.setBottom(tieBreaker(bPane, winnerBox, playAgainBtn));
+                                }
+                                bPane.setCenter(new Text(controller.getGameDisplay()));
                             }
-                            // If computer wins
-                            if (controller.determineWinner() == 2) {
-                                winnerBox.getChildren().clear();
-                                winnerBox.getChildren().addAll(new Text("Computer is the Winner!"), playAgainBtn);
-                                controller.playerWin(2);
-                                VBox playerDisplay = setPlayerDisplay(2);
-                                bPane.setRight(playerDisplay);
-                                bPane.setBottom(winnerBox);
-                                loseMedia.play();
-                            }
-                            bPane.setCenter(new Text(controller.getGameDisplay()));
                         }
                     }
                 }
@@ -361,6 +377,82 @@ public class MainView {
         return bPane;
     }
 
+    // Create buttons for tic tac toe board
+//    private GridPane createTicTacToeButtons(){
+//        GridPane gPane = new GridPane();
+//        int boardSize = controller.getBoardSize();
+//        int row = 0;
+//        int col = 0;
+//        for(int i = 0; i < boardSize; i++){
+//            int row = i;
+//            for(int j = 0; j < boardSize; j++){
+//                Button button = new Button(" ");
+//                button.setOnAction((event)->{
+//                    controller.setSelection(i,j,controller.getPlayerTurn());
+//                });
+//            }
+//        }
+//        return gPane;
+//    }
+
+
+    // Tie Breaker
+    private GridPane tieBreaker(BorderPane gameView, VBox winnerBox, Button playAgain){
+        GridPane gPane = new GridPane();
+        int randNum = (int)(Math.random()*1000);
+        gPane.setAlignment(Pos.CENTER);
+        gPane.add(new Text("Tie Breaker!"), 1,0);
+        TextField playerOneGuess = new TextField();
+        TextField playerTwoGuess = new TextField();
+
+        Text p1Win = new Text(controller.getPlayerOneName() + " is the Winner!");
+        Text p2Win = new Text(controller.getPlayerTwoName() + " is the Winner!");
+        Text compWin = new Text("Computer is the Winner!");
+
+        if(controller.getPlayerCount() == 1){
+            gPane.add(new Text(controller.getPlayerOneName() +"'s Guess"), 1,1);
+            gPane.add(playerOneGuess, 1,2);
+        }else{
+            gPane.add(new Text(controller.getPlayerOneName() +"'s Guess"), 0,1);
+            gPane.add(playerOneGuess, 0,2);
+            gPane.add(new Text(controller.getPlayerTwoName() +"'s Guess"), 2,1);
+            gPane.add(playerTwoGuess, 2,2);
+        }
+        Button guessBtn = new Button("Guess");
+        guessBtn.setOnAction((event)->{
+            int guess1 = Integer.parseInt(playerOneGuess.getText());
+            int guess2 = -1;
+            if(controller.getPlayerCount() == 1){
+                guess2 = (int)Math.random()*1000;
+            }else{
+                guess2 = Integer.parseInt(playerTwoGuess.getText());
+            }
+
+            if(Math.abs(guess1-randNum) < Math.abs(guess2-randNum)){
+                // Player 1 is winner
+                winnerBox.getChildren().clear();
+                winnerBox.getChildren().addAll(new Text("Winning Number is: " + randNum), p1Win, playAgain);
+                controller.playerWin(1);
+                gameView.setBottom(winnerBox);
+            }else if(Math.abs(guess1-randNum) > Math.abs(guess2-randNum)){
+                // Player 2 is winner
+                winnerBox.getChildren().clear();
+                if(controller.getPlayerCount() == 2)
+                    winnerBox.getChildren().addAll(new Text("Winning Number is: " + randNum), p2Win, playAgain);
+                else
+                    winnerBox.getChildren().addAll(new Text("Winning Number is: " + randNum), compWin, playAgain);
+                controller.playerWin(2);
+                gameView.setBottom(winnerBox);
+
+            }else{
+                // Tie, so redo?
+                gameView.setBottom(tieBreaker(gameView, winnerBox,playAgain));
+            }
+        });
+
+        gPane.add(guessBtn, 1,3);
+        return gPane;
+    }
     // Displays player information during game
     private VBox setPlayerDisplay(int playerNum){
         VBox playerDisplay = new VBox(5);
@@ -375,6 +467,7 @@ public class MainView {
                 playerDisplay.getChildren().addAll(new Label("Player 2"), new Text("Name: Computer"), new Text("Marker: C"), new Text("Win(s): " + controller.getPlayerWin(2)));
             }
         }
+        playerDisplay.setAlignment(Pos.CENTER);
         return playerDisplay;
     }
 
@@ -447,8 +540,14 @@ public class MainView {
         GridPane gPane = new GridPane();
         int currRow = 0;
         int currCol = 0;
-        for(int i = 0; i < 9; i++){
-            gPane.add(new Text(controller.getUltimateBoard(i)), currCol++, currRow);
+        int currBoard = 0;
+        for(int i = 0; i < 12; i++){
+            if(i%4 == 0){
+                for(int j = 0; j < 3; j++)
+                    gPane.add(new Text("Board "+ (currBoard+j)), currCol++,currRow);
+            }else {
+                gPane.add(new Text(controller.getUltimateBoard(currBoard++)), currCol++, currRow);
+            }
             if(currCol == 3){
                 currCol = 0;
                 currRow++;
@@ -456,6 +555,7 @@ public class MainView {
         }
         gPane.setHgap(20);
         gPane.setVgap(20);
+        gPane.setAlignment(Pos.CENTER);
         return gPane;
     }
     public BorderPane changeGameMode(){
@@ -476,13 +576,7 @@ public class MainView {
 
         vsPlayerBtn.setOnAction((event)->{
            controller.changeGameMode(1);
-           if(controller.getPlayerTwo()== null){
-               System.out.println("Player 2 is non existent :(");
-               controller.createPlayer("Filler", "Filler", 2);
                root.setCenter(editPlayerView());
-           }else{
-               root.setCenter(buildMenu());
-           }
         });
 
         vsComBtn.setOnAction((event)->{
@@ -500,9 +594,11 @@ public class MainView {
         return bPane;
     }
     public BorderPane getRoot(){
-        root.setAlignment(buildMenu(), Pos.CENTER);
-        root.setTop(new Label("Tic Tac Toe"));
+        Label title= new Label("Tic-Tac-Toe");
+        root.setTop(title);
         root.setCenter(buildMenu());
+        root.setAlignment(title,Pos.CENTER);
+        root.setAlignment(buildMenu(), Pos.CENTER);
         return root;
     }
 }
