@@ -179,12 +179,13 @@ public class MainView {
         return bPane;
     }
 
-    public BorderPane playGameView(){
+    public BorderPane playGameView() {
+        int gameMode = controller.getGameMode();
         BorderPane bPane = new BorderPane();
 
         HBox topBar = new HBox(5);
         Button quitBtn = new Button("Quit Game");
-        quitBtn.setOnAction((event)->{
+        quitBtn.setOnAction((event) -> {
             controller.newGame();
             root.setCenter(buildMenu());
         });
@@ -207,13 +208,20 @@ public class MainView {
         turnPane.getChildren().add(p1Turn);
         TextField rowTF = new TextField();
         TextField colTF = new TextField();
+        TextField boardNumTF = new TextField();
 
         Button submitBtn = new Button("Submit");
         Button playAgainBtn = new Button("Play Again");
 
         VBox winnerBox = new VBox(5);
         VBox selectionBox = new VBox(5);
-        selectionBox.getChildren().addAll(turnPane, new Label("Row"), rowTF, new Label("Column"), colTF, submitBtn);
+        if (gameMode == 1 || gameMode == 2){
+            selectionBox.getChildren().addAll(turnPane, new Label("Row"), rowTF, new Label("Column"), colTF, submitBtn);
+        }else if(gameMode == 3) {
+            selectionBox.getChildren().addAll(turnPane, new Label("Row"), rowTF,
+                    new Label("Column"), colTF,
+                    new Label("Board"), boardNumTF, submitBtn);
+        }
 
         VBox playerOneDisplay = setPlayerDisplay(1);
         VBox playerTwoDisplay = setPlayerDisplay(2);
@@ -221,58 +229,89 @@ public class MainView {
         topBar.getChildren().addAll(quitBtn, winMediaView, loseMediaView);
         bPane.setTop(topBar);
         bPane.setBottom(selectionBox);
-        bPane.setCenter(new Text(controller.getGameDisplay()));
+        if(gameMode == 1 || gameMode==2) {
+            bPane.setCenter(new Text(controller.getGameDisplay()));
+        }else if(gameMode == 3){
+            bPane.setCenter(displayUltimateBoard());
+        }
         bPane.setLeft(playerOneDisplay);
         bPane.setRight(playerTwoDisplay);
-        submitBtn.setOnAction((event)->{
 
-
+        // Submit Button
+        submitBtn.setOnAction((event)-> {
             String rowText = rowTF.getText();
             String colText = colTF.getText();
-
-            if(rowText.matches("\\d") && colText.matches("\\d")){
+            if (rowText.matches("\\d") && colText.matches("\\d")) {
+                //Get Row and Col from textfields
                 int rowNum = Integer.parseInt(rowText);
                 int colNum = Integer.parseInt(colText);
 
-                if(controller.setSelection(rowNum,colNum,controller.getPlayerTurn())){
-                    if(controller.getPlayerCount() == 2) {
-                        controller.nextPlayerTurn();
+                // Game Mode: Regular Tic-Tac-Toe (vs Comp & vs Player)
+                if(gameMode == 1 || gameMode == 2){
+                    if (controller.setSelection(rowNum, colNum, controller.getPlayerTurn())) {
+                        // Changes player turn
+                        if (controller.getPlayerCount() == 2) {
+                            controller.nextPlayerTurn();
+                        }
+                        bPane.setCenter(new Text(controller.getGameDisplay()));
+                    } else {
+                        System.out.println("Invalid move");
                     }
-                    turnPane.getChildren().clear();
-                    if(controller.getPlayerTurn() == 1){
-                        turnPane.getChildren().add(p1Turn);
-                    }else{
-                        turnPane.getChildren().add(p2Turn);
+                } // Game Mode: Ultimate Tic Tac Toe
+                else if(gameMode == 3){
+                    String boardNumText = boardNumTF.getText();
+                    if(boardNumText.matches("\\d")){
+                        int boardNum = Integer.parseInt(boardNumText);
+                        if(controller.placeUltimatePiece(rowNum,colNum,controller.getPlayerTurn(),boardNum)){
+                            // Changes player turn
+                            if (controller.getPlayerCount() == 2) {
+                                controller.nextPlayerTurn();
+                            }
+                            bPane.setCenter(displayUltimateBoard());
+                            // Switches "Current" Playable Board
+                            if(controller.isValidUltimateBoard(controller.currUltimateBoard())){
+                                boardNumTF.setDisable(true);
+                                boardNumTF.setText(controller.currUltimateBoard()+"");
+                            }else{
+                                boardNumTF.setDisable(false);
+                                boardNumTF.setText("");
+                            }
+                        }else{
+                            System.out.println("Invalid move");
+                        }
                     }
-                    bPane.setCenter(new Text(controller.getGameDisplay()));
+                }
 
-                    // Check if there is a winner
-                    System.out.println(controller.determineWinner());
-                    int winnerNum = controller.determineWinner();
-                    if(winnerNum == 1){
-                        winnerBox.getChildren().clear();
-                        winnerBox.getChildren().addAll(p1Win, playAgainBtn);
-                        controller.playerWin(1);
-                        VBox playerDisplay = setPlayerDisplay(1);
-                        winMedia.play();
-                        bPane.setLeft(playerDisplay);
-                        bPane.setBottom(winnerBox);
-                    }else if(winnerNum == 2){
-                        winnerBox.getChildren().clear();
-                        winnerBox.getChildren().addAll(p2Win, playAgainBtn);
-                        controller.playerWin(2);
-                        VBox playerDisplay = setPlayerDisplay(2);
-                        bPane.setRight(playerDisplay);
-                        bPane.setBottom(winnerBox);
-                        winMedia.play();
-                    }else if(winnerNum == 3){
-                        winnerBox.getChildren().clear();
-                        winnerBox.getChildren().addAll(new Label("It's a Tie!"), playAgainBtn);
-                        bPane.setBottom(winnerBox);
-                        loseMedia.play();
-                    }
+                // Check Winner
+                // Check if there is a winner
+                int winnerNum = controller.determineWinner();
+                if (winnerNum == 1) { // Winner is player 1
+                    winnerBox.getChildren().clear();
+                    winnerBox.getChildren().addAll(p1Win, playAgainBtn);
+                    controller.playerWin(1);
+                    VBox playerDisplay = setPlayerDisplay(1);
+                    winMedia.play();
+                    bPane.setLeft(playerDisplay);
+                    bPane.setBottom(winnerBox);
+                } else if (winnerNum == 2) { // Winner is player 2
+                    winnerBox.getChildren().clear();
+                    winnerBox.getChildren().addAll(p2Win, playAgainBtn);
+                    controller.playerWin(2);
+                    VBox playerDisplay = setPlayerDisplay(2);
+                    bPane.setRight(playerDisplay);
+                    bPane.setBottom(winnerBox);
+                    winMedia.play();
+                } else if (winnerNum == 3) { // Tie
+                    winnerBox.getChildren().clear();
+                    winnerBox.getChildren().addAll(new Label("It's a Tie!"), playAgainBtn);
+                    bPane.setBottom(winnerBox);
+                    loseMedia.play();
+                }
 
-                    if(winnerNum == 0) {
+                // If no winner
+                if (winnerNum == 0) {
+                    // Computer plays
+                    if(gameMode == 1 || gameMode == 2) {
                         if (controller.getPlayerCount() == 1) {
                             int row = (int) (Math.random() * 3);
                             int col = (int) (Math.random() * 3);
@@ -296,14 +335,21 @@ public class MainView {
                             bPane.setCenter(new Text(controller.getGameDisplay()));
                         }
                     }
-
-                }else{
-                    System.out.println("Invalid move");
                 }
-                rowTF.setText("");
-                colTF.setText("");
             }
+
+            // Change Current Player Turn Display
+            turnPane.getChildren().clear();
+            if (controller.getPlayerTurn() == 1) {
+                turnPane.getChildren().add(p1Turn);
+            } else {
+                turnPane.getChildren().add(p2Turn);
+            }
+            // Clears textfields
+            rowTF.setText("");
+            colTF.setText("");
         });
+
         playAgainBtn.setOnAction((event)->{
             controller.newGame();
             turnPane.getChildren().clear();
@@ -395,6 +441,22 @@ public class MainView {
             }
         });
         return bPane;
+    }
+
+    private GridPane displayUltimateBoard(){
+        GridPane gPane = new GridPane();
+        int currRow = 0;
+        int currCol = 0;
+        for(int i = 0; i < 9; i++){
+            gPane.add(new Text(controller.getUltimateBoard(i)), currCol++, currRow);
+            if(currCol == 3){
+                currCol = 0;
+                currRow++;
+            }
+        }
+        gPane.setHgap(20);
+        gPane.setVgap(20);
+        return gPane;
     }
     public BorderPane changeGameMode(){
         BorderPane bPane = new BorderPane();

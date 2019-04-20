@@ -3,6 +3,7 @@ package course.oop.controller;
 import course.oop.controller.TTTControllerInterface;
 import course.oop.objects.Board;
 import course.oop.objects.Player;
+import course.oop.objects.UltimateBoard;
 
 import java.io.Serializable;
 import java.util.Timer;
@@ -12,6 +13,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	private boolean vsHuman;
 	private int timeout;
 	private Board board;
+	private UltimateBoard ultimateBoard;
 	private Player player1;
 	private Player player2;
 	private Player playerComp;
@@ -60,7 +62,6 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 		if(playerNum == 1 || playerNum == 2) {
 			if (playerNum == 1) {
 				player1 = new Player(username, marker);
-//				player2 = new Player("Filler", "Filler");
 			}else {
 				player2 = new Player(username, marker);
 			}
@@ -86,28 +87,60 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 
 	@Override
 	public int determineWinner() {
-		String winMarker = board.checkWinner();
-		System.out.println(winMarker);
-		if(winMarker == null)
-			return 0;
-		else if(winMarker.equals(player1.getMarker()))
-			return 1;
-		else if(vsHuman) {
-			if(winMarker.equals(player2.getMarker()))
-				return 2;
-		}else if(!vsHuman) {
-			if(winMarker.equals(playerComp.getMarker()))
-				return 2;
+		if(gameMode == 1 || gameMode == 2) {
+			String winMarker = board.checkWinner();
+			System.out.println(winMarker);
+			if (winMarker == null)
+				return 0;
+			else if (winMarker.equals(player1.getMarker()))
+				return 1;
+			else if (vsHuman) {
+				if (winMarker.equals(player2.getMarker()))
+					return 2;
+			} else if (!vsHuman) {
+				if (winMarker.equals(playerComp.getMarker()))
+					return 2;
+			}
+			return 3;
+		}else if(gameMode == 3){
+			return ultimateBoard.checkOverallWinner();
 		}
-		return 3;
+		return 0;
 	}
 
 	@Override
 	public String getGameDisplay() {
-		String results = board.toString();
+		String results = new String();
+		if(gameMode == 1 || gameMode == 2)
+			results = board.toString();
 		return results;
 	}
-	
+
+	public boolean placeUltimatePiece(int row, int col, int player, int boardNum){
+		if(player == 1){
+			return ultimateBoard.placeMarker(row,col,player1.getMarker(), boardNum);
+//			return ultimateBoard.placePiece(row,col, player1.getMarker());
+		}
+		else if (player == 2) {
+			if(vsHuman) {
+				return ultimateBoard.placeMarker(row,col,player2.getMarker(), boardNum);
+			}else
+				return ultimateBoard.placeMarker(row,col,playerComp.getMarker(), boardNum);
+		}
+		return false;
+	}
+
+	public String getUltimateBoard(int boardNum){
+		return ultimateBoard.printBoard(boardNum);
+	}
+	public int currUltimateBoard(){
+		return ultimateBoard.getCurrBoard();
+	}
+	public boolean isValidUltimateBoard(int boardNum){
+		return ultimateBoard.validBoard(boardNum);
+	}
+
+
 	public int getTimeout() {
 		return timeout;
 	}
@@ -115,7 +148,10 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	public int getPlayerCount(){return playerCount;}
 
 	public void newGame(){
-		board.newGame();
+		if(gameMode == 1 || gameMode == 2)
+			board.newGame();
+		else if(gameMode == 3)
+			ultimateBoard.newBoard();
 		playerTurn = 1;
 	}
 
@@ -177,6 +213,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 		}
 	}
 
+	public int getGameMode(){return gameMode;}
 	public void changeGameMode(int gameMode){
 		switch(gameMode){
 			case 1:
@@ -193,6 +230,8 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 				break;
 			case 3:
 				// Ultimate Tic Tac Toe
+				ultimateBoard = new UltimateBoard(player1.getMarker(), player2.getMarker());
+				ultimateBoard.newBoard();
 				break;
 			default:
 				System.out.println("Invalid Game Mode");

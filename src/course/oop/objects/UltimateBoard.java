@@ -22,14 +22,19 @@ public class UltimateBoard {
 
     // Returns boolean if board is valid with no winner determined yet.
     public boolean validBoard(int boardNum){
-        return winnerTracker[getMainRow(boardNum)][getMainCol(boardNum)];
+        return !winnerTracker[getMainRow(boardNum)][getMainCol(boardNum)];
     }
 
     public boolean placeMarker(int row, int col, String marker, int boardNum){
+        // If board has no winner/tie
         if(validBoard(boardNum)){
             boolean result = mainBoard[getMainRow(boardNum)][getMainCol(boardNum)].placePiece(row,col, marker);
+
+            // If can place in board
             if(result){
+                // Change current board to the board located at [row][col]
                 currBoardNum = changeBoard(row, col);
+                checkBoardWinner(boardNum);
                 return true;
             }else
                 return false;
@@ -57,6 +62,7 @@ public class UltimateBoard {
         int boardRow = getMainRow(boardNum);
         int boardCol = getMainCol(boardNum);
         String winMarker = mainBoard[boardRow][boardCol].checkWinner();
+        if(winMarker == null) return;
         if(winMarker.equals(p1Marker)){
             winCountP1++;
             winnerTracker[boardRow][boardCol] = true;
@@ -72,14 +78,14 @@ public class UltimateBoard {
         }
     }
 
-    public String checkOverallWinner(){
+    public int checkOverallWinner(){
         if(winCountP1== 3)
-            return p1Marker;
+            return 1;
         else if (winCountP2 == 3)
-            return p2Marker;
+            return 2;
         else if(boardFillCount == 9)
-            return "TIE";
-        return null;
+            return 3;
+        return 0;
     }
 
     public int getCurrBoard(){
@@ -95,14 +101,9 @@ public class UltimateBoard {
     private int changeBoard(int row, int col){
         return row*3 + col;
     }
-    public String printBoard(){
-        String results = "";
-        for(int i = 0; i < mainBoard.length; i++){
-            for(int j = 0; j < mainBoard[i].length; j++){
-                results += mainBoard[i][j].toString();
-            }
-            results += "\n";
-        }
-        return results;
+
+    // Print a specific board
+    public String printBoard(int boardNum){
+        return mainBoard[getMainRow(boardNum)][getMainCol(boardNum)].toString();
     }
 }
