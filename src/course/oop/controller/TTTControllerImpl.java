@@ -78,19 +78,19 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	@Override
 	public boolean setSelection(int row, int col, int currentPlayer) {
 		if(currentPlayer == 1)
-			return board.placePiece(row,col, player1.getMarker());
+			return board.placePiece(row,col, player1.getMarker(), currentPlayer);
 		else if (currentPlayer == 2) {
 			if(vsHuman) {
-				return board.placePiece(row, col, player2.getMarker());
+				return board.placePiece(row, col, player2.getMarker(), currentPlayer);
 			}else
-				return board.placePiece(row,col, playerComp.getMarker());
+				return board.placePiece(row,col, playerComp.getMarker(), currentPlayer);
 		}
 		return false;
 	}
 
 	@Override
 	public int determineWinner() {
-		if(gameMode == 1 || gameMode == 2) {
+		if(gameMode == 1 || gameMode == 2 || gameMode == 6) {
 			String winMarker = board.checkWinner();
 			System.out.println(winMarker);
 			if (winMarker == null)
@@ -114,21 +114,21 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	@Override
 	public String getGameDisplay() {
 		String results = new String();
-		if(gameMode == 1 || gameMode == 2)
+		if(gameMode == 1 || gameMode == 2 || gameMode == 6)
 			results = board.toString();
 		return results;
 	}
 
 	public boolean placeUltimatePiece(int row, int col, int player, int boardNum){
 		if(player == 1){
-			return ultimateBoard.placeMarker(row,col,player1.getMarker(), boardNum);
+			return ultimateBoard.placeMarker(row,col,player1.getMarker(), player, boardNum);
 //			return ultimateBoard.placePiece(row,col, player1.getMarker());
 		}
 		else if (player == 2) {
 			if(vsHuman) {
-				return ultimateBoard.placeMarker(row,col,player2.getMarker(), boardNum);
+				return ultimateBoard.placeMarker(row,col,player2.getMarker(), player,boardNum);
 			}else
-				return ultimateBoard.placeMarker(row,col,playerComp.getMarker(), boardNum);
+				return ultimateBoard.placeMarker(row,col,playerComp.getMarker(), player, boardNum);
 		}
 		return false;
 	}
@@ -151,11 +151,18 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	public int getPlayerCount(){return playerCount;}
 
 	public void newGame(){
-		if(gameMode == 1 || gameMode == 2)
+		if(gameMode == 1 || gameMode == 2 || gameMode == 6)
 			board.newGame();
 		else if(gameMode == 3)
 			ultimateBoard.newBoard();
 		playerTurn = 1;
+	}
+
+	public void newGame(int boardSize){
+		if(gameMode == 6) {
+			board = new Board(boardSize);
+			System.out.println("New Board Size: " + boardSize);
+		}
 	}
 	public int getBoardSize(){
 		return boardSize;
@@ -241,10 +248,21 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 				ultimateBoard = new UltimateBoard(player1.getMarker(), player2.getMarker());
 				ultimateBoard.newBoard();
 				break;
+			case 4:
+				// Randomize Game Mode
+				break;
+			case 5:
+				// Rotate Game Mode
+				break;
+			case 6:
+				// n x n Game Mode
+				break;
+
 			default:
 				System.out.println("Invalid Game Mode");
 		}
 		this.gameMode = gameMode;
+
 
 	}
 }

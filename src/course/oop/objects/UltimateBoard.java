@@ -25,10 +25,10 @@ public class UltimateBoard {
         return !winnerTracker[getMainRow(boardNum)][getMainCol(boardNum)];
     }
 
-    public boolean placeMarker(int row, int col, String marker, int boardNum){
+    public boolean placeMarker(int row, int col, String marker, int playerNum, int boardNum){
         // If board has no winner/tie
         if(validBoard(boardNum)){
-            boolean result = mainBoard[getMainRow(boardNum)][getMainCol(boardNum)].placePiece(row,col, marker);
+            boolean result = mainBoard[getMainRow(boardNum)][getMainCol(boardNum)].placePiece(row,col, marker, playerNum);
 
             // If can place in board
             if(result){
@@ -64,15 +64,18 @@ public class UltimateBoard {
         String winMarker = mainBoard[boardRow][boardCol].checkWinner();
         if(winMarker == null) return;
         if(winMarker.equals(p1Marker)){
+            System.out.println("Player 1 won this board | " + boardNum);
             winCountP1++;
             winnerTracker[boardRow][boardCol] = true;
             boardFillCount++;
 
         }else if(winMarker.equals(p2Marker)){
+            System.out.println("Player 2 won this board | " + boardNum);
             winCountP2++;
             winnerTracker[boardRow][boardCol] = true;
             boardFillCount++;
         }else if(winMarker.equals("TIE")){
+            System.out.println("No winner on this board | " +boardNum);
             winnerTracker[boardRow][boardCol] = true;
             boardFillCount++;
         }

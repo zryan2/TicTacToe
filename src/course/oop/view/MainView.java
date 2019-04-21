@@ -219,7 +219,7 @@ public class MainView {
 
         VBox winnerBox = new VBox(5);
         VBox selectionBox = new VBox(5);
-        if (gameMode == 1 || gameMode == 2){
+        if (gameMode == 1 || gameMode == 2 || gameMode == 6){
             selectionBox.getChildren().addAll(turnPane, new Label("Row"), rowTF, new Label("Column"), colTF, submitBtn);
         }else if(gameMode == 3) {
             selectionBox.getChildren().addAll(turnPane, new Label("Row"), rowTF,
@@ -233,7 +233,7 @@ public class MainView {
         topBar.getChildren().addAll(quitBtn, winMediaView, loseMediaView);
         bPane.setTop(topBar);
         bPane.setBottom(selectionBox);
-        if(gameMode == 1 || gameMode==2) {
+        if(gameMode == 1 || gameMode == 2 || gameMode == 6) {
             bPane.setCenter(new Text(controller.getGameDisplay()));
             bPane.setAlignment(new Text(controller.getGameDisplay()),Pos.CENTER);
         }else if(gameMode == 3){
@@ -255,7 +255,7 @@ public class MainView {
                 int colNum = Integer.parseInt(colText);
                 boolean placePieceSuccessful = false;
                 // Game Mode: Regular Tic-Tac-Toe (vs Comp & vs Player)
-                if(gameMode == 1 || gameMode == 2){
+                if(gameMode == 1 || gameMode == 2 || gameMode == 6){
                     placePieceSuccessful = controller.setSelection(rowNum, colNum, controller.getPlayerTurn());
                     if (placePieceSuccessful) {
                         // Changes player turn
@@ -324,15 +324,15 @@ public class MainView {
                     // If no winner
                     if (winnerNum == 0) {
                         // Computer plays
-                        if (gameMode == 1 || gameMode == 2) {
+                        if (gameMode == 1 || gameMode == 2 || gameMode == 6) {
                             if (controller.getPlayerCount() == 1) {
-                                int row = (int) (Math.random() * 3);
-                                int col = (int) (Math.random() * 3);
+                                int row = (int) (Math.random() * controller.getBoardSize());
+                                int col = (int) (Math.random() * controller.getBoardSize());
                                 boolean compMove = controller.setSelection(row, col, 2);
                                 System.out.println("Computer's Turn!: " + compMove + " row " + row + " col " + col);
                                 while (!compMove) {
-                                    row = (int) (Math.random() * 3);
-                                    col = (int) (Math.random() * 3);
+                                    row = (int) (Math.random() * controller.getBoardSize());
+                                    col = (int) (Math.random() * controller.getBoardSize());
                                     compMove = controller.setSelection(row, col, 2);
                                 }
                                 // If computer wins
@@ -558,12 +558,35 @@ public class MainView {
         gPane.setAlignment(Pos.CENTER);
         return gPane;
     }
+    public VBox boardSizeView(){
+        VBox vBox = new VBox(10);
+        Button backBtn= new Button("Back");
+        TextField boardSize = new TextField();
+        Button submitBtn = new Button("Submit");
+        vBox.getChildren().addAll(backBtn, new Label("Size of Board (min. 3)"), boardSize, submitBtn);
+        backBtn.setOnAction((event)->{
+          root.setCenter(changeGameMode());
+        });
+
+        submitBtn.setOnAction((event)->{
+            controller.changeGameMode(6);
+            String boardSizeText = boardSize.getText();
+            if(boardSizeText.matches("\\d")){
+                controller.newGame(Integer.parseInt(boardSizeText));
+                root.setCenter(buildMenu());
+            }
+
+        });
+        return vBox;
+    }
     public BorderPane changeGameMode(){
         BorderPane bPane = new BorderPane();
         Button vsPlayerBtn = new Button("Vs. Player");
         Button vsComBtn = new Button("Vs. Computer");
         Button ultimateBtn = new Button("Ultimate Tic Tac Toe");
-
+        Button randomizeBtn = new Button("Randomize N Moves");
+        Button rotateBtn = new Button ("Rotate Tic Tac Toe");
+        Button nXnBtn = new Button("n x n Tic Tac Toe");
         Button backBtn = new Button("Back");
         backBtn.setOnAction((event) -> {
             root.setCenter(buildMenu());
@@ -573,6 +596,9 @@ public class MainView {
         gameModeDisplay.add(vsPlayerBtn, 0, 0);
         gameModeDisplay.add(vsComBtn, 1, 0);
         gameModeDisplay.add(ultimateBtn, 2, 0);
+        gameModeDisplay.add(randomizeBtn,0,1);
+        gameModeDisplay.add(rotateBtn, 1,1);
+        gameModeDisplay.add(nXnBtn,2,1);
 
         vsPlayerBtn.setOnAction((event)->{
            controller.changeGameMode(1);
@@ -589,6 +615,21 @@ public class MainView {
             root.setCenter(buildMenu());
         });
 
+        randomizeBtn.setOnAction((event)->{
+            controller.changeGameMode(4);
+            root.setCenter(buildMenu());
+        });
+        rotateBtn.setOnAction((event)->{
+            controller.changeGameMode(5);
+            root.setCenter(buildMenu());
+        });
+        nXnBtn.setOnAction((event)->{
+            root.setCenter(boardSizeView());
+        });
+        gameModeDisplay.setAlignment(Pos.CENTER);
+        gameModeDisplay.setHgap(8);
+        gameModeDisplay.setVgap(8);
+        bPane.setAlignment(gameModeDisplay, Pos.CENTER);
         bPane.setTop(backBtn);
         bPane.setCenter(gameModeDisplay);
         return bPane;
