@@ -1,8 +1,10 @@
 package course.oop.view;
 
 import course.oop.controller.TTTControllerImpl;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
@@ -41,6 +43,7 @@ public class MainView {
         Button startBtn = new Button("Start Game");
         Button editBtn = new Button("Edit Players");
         Button changeModeBtn = new Button("Change Game Mode");
+        Button helpBtn = new Button("Help");
         Button quitBtn = new Button("Quit Game");
 
         gPane.add(createBtn,0,0);
@@ -50,7 +53,8 @@ public class MainView {
             gPane.add(editBtn, 0, 2);
             gPane.add(changeModeBtn, 0, 3);
         }
-        gPane.add(quitBtn,0,4);
+        gPane.add(helpBtn, 0, 4);
+        gPane.add(quitBtn,0,5);
 
         // Create Game Button
         createBtn.setOnAction((event)->{
@@ -67,8 +71,14 @@ public class MainView {
             root.setCenter(editPlayerView());
         });
 
+        // Change Game Mode
         changeModeBtn.setOnAction((event)->{
             root.setCenter(changeGameMode());
+        });
+
+        // Help Button
+        helpBtn.setOnAction((event)->{
+            root.setCenter(helpMenu());
         });
         // Quit Button
         quitBtn.setOnAction((event)->{
@@ -122,13 +132,17 @@ public class MainView {
         });
 
         gPane.add(backBtn,0,0);
-        gPane.add(new Label("Game Mode"), 1, 1);
+        gPane.add(new Label("Basic Game Mode"), 1, 1);
         gPane.add(vsPlayerBtn,0,2);
-        gPane.add(vsComp,1,2);
+        gPane.add(vsComp,2,2);
         gPane.add(new Label("Timeout (Seconds)"), 0, 3);
         gPane.add(timeOut,1,3);
         gPane.add(nextBtn,1,4);
 
+        gPane.setAlignment(Pos.CENTER);
+        gPane.setPadding(new Insets(8,8,8,8));
+        gPane.setHgap(8);
+        gPane.setVgap(8);
         return gPane;
     }
 
@@ -179,10 +193,18 @@ public class MainView {
                 }
             }
         });
+        p1Info.setMaxWidth(200);
+        p2Info.setMaxWidth(200);
+        bPane.setAlignment(submitBtn, Pos.TOP_CENTER);
+        bPane.setAlignment(p1Info, Pos.CENTER);
+        bPane.setAlignment(p2Info, Pos.CENTER);
+        bPane.setMaxSize(450,300);
+        bPane.setPadding(new Insets(15,15,15,15));
         return bPane;
     }
 
-    public BorderPane playGameView() {
+    public ScrollPane playGameView() {
+        ScrollPane scrollPane = new ScrollPane();
         int gameMode = controller.getGameMode();
         BorderPane bPane = new BorderPane();
 
@@ -244,7 +266,7 @@ public class MainView {
         bPane.setRight(playerTwoDisplay);
         selectionBox.setAlignment(Pos.CENTER_LEFT);
         winnerBox.setAlignment(Pos.CENTER);
-        bPane.setPadding(new Insets(15, 15,15,15));
+
         // Submit Button
         submitBtn.setOnAction((event)-> {
             String rowText = rowTF.getText();
@@ -374,7 +396,18 @@ public class MainView {
             bPane.setCenter(new Text(controller.getGameDisplay()));
 
         });
-        return bPane;
+        bPane.setPadding(new Insets(15,15,15,15));
+        bPane.setMargin(playerOneDisplay, new Insets(15,15,15,15));
+        bPane.setMargin(playerTwoDisplay, new Insets(15,15,15,15));
+        bPane.setMargin(selectionBox, new Insets(15,15,15,15));
+        bPane.setMargin(winnerBox, new Insets(15,15,15,15));
+        scrollPane.setContent(bPane);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPadding(new Insets(15,15,15,15));
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        return scrollPane;
     }
 
     // Create buttons for tic tac toe board
@@ -584,8 +617,6 @@ public class MainView {
         Button vsPlayerBtn = new Button("Vs. Player");
         Button vsComBtn = new Button("Vs. Computer");
         Button ultimateBtn = new Button("Ultimate Tic Tac Toe");
-        Button randomizeBtn = new Button("Randomize N Moves");
-        Button rotateBtn = new Button ("Rotate Tic Tac Toe");
         Button nXnBtn = new Button("n x n Tic Tac Toe");
         Button backBtn = new Button("Back");
         backBtn.setOnAction((event) -> {
@@ -596,18 +627,16 @@ public class MainView {
         gameModeDisplay.add(vsPlayerBtn, 0, 0);
         gameModeDisplay.add(vsComBtn, 1, 0);
         gameModeDisplay.add(ultimateBtn, 2, 0);
-        gameModeDisplay.add(randomizeBtn,0,1);
-        gameModeDisplay.add(rotateBtn, 1,1);
-        gameModeDisplay.add(nXnBtn,2,1);
+        gameModeDisplay.add(nXnBtn,1,1);
 
         vsPlayerBtn.setOnAction((event)->{
-           controller.changeGameMode(1);
-               root.setCenter(editPlayerView());
+            controller.changeGameMode(1);
+            root.setCenter(editPlayerView());
         });
 
         vsComBtn.setOnAction((event)->{
-           controller.changeGameMode(2);
-           root.setCenter(buildMenu());
+            controller.changeGameMode(2);
+            root.setCenter(buildMenu());
         });
 
         ultimateBtn.setOnAction((event)->{
@@ -615,14 +644,6 @@ public class MainView {
             root.setCenter(buildMenu());
         });
 
-        randomizeBtn.setOnAction((event)->{
-            controller.changeGameMode(4);
-            root.setCenter(buildMenu());
-        });
-        rotateBtn.setOnAction((event)->{
-            controller.changeGameMode(5);
-            root.setCenter(buildMenu());
-        });
         nXnBtn.setOnAction((event)->{
             root.setCenter(boardSizeView());
         });
@@ -633,6 +654,38 @@ public class MainView {
         bPane.setTop(backBtn);
         bPane.setCenter(gameModeDisplay);
         return bPane;
+    }
+    public ScrollPane helpMenu(){
+        ScrollPane scrollPane = new ScrollPane();
+        VBox vBox = new VBox(10);
+        Button backBtn = new Button("Back");
+        backBtn.setOnAction((event)->{
+            root.setCenter(buildMenu());
+        });
+        Label normalLabel = new Label("Regular Tic-Tac-Toe (Vs. Player / Vs. Computer");
+        Text normalhelpText = new Text("Play against another player or a computer in a basic 3x3 Tic-Tac-Toe Board!");
+        Label ultimateLabel = new Label("Ultimate Tic-Tac-Toe");
+        Text ultimateHelpText = new Text("Player against another player\n" +
+                "1. Win three games of Tic Tac Toe in a row.\n" +
+                "2. You may only play in the big field that corresponds to the \n" +
+                "   last small field your opponent played.\n" +
+                "3. When your are sent to a field that is already decided, you choose freely");
+        Label nxnLabel = new Label("N x N Tic-Tac-Toe");
+        Text nxnHelpText = new Text("Play against another player or a computer. \n" +
+                "Choose a number N, and you are given an NxN board. \n" +
+                "The winner is decided when N in a row is achieved.");
+        vBox.getChildren().addAll(backBtn, normalLabel, normalhelpText, ultimateLabel, ultimateHelpText, nxnLabel, nxnHelpText);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setMaxWidth(200);
+        vBox.setPadding(new Insets(15,15,15,15));
+
+        scrollPane.setContent(vBox);
+        scrollPane.setPadding(new Insets(15,15,15,15));
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        return scrollPane;
     }
     public BorderPane getRoot(){
         Label title= new Label("Tic-Tac-Toe");

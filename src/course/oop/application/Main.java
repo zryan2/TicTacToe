@@ -15,6 +15,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         MainView root = new MainView();
         Scene scene = new Scene(root.getRoot(), 700, 700);
+        scene.getStylesheets().add(getClass().getResource("course/oop/css/stylesheet.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.show();
     }

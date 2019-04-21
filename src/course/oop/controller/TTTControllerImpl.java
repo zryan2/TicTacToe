@@ -161,6 +161,7 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 	public void newGame(int boardSize){
 		if(gameMode == 6) {
 			board = new Board(boardSize);
+			this.boardSize = boardSize;
 			System.out.println("New Board Size: " + boardSize);
 		}
 	}
