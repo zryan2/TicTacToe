@@ -207,7 +207,8 @@ public class MainView {
         ScrollPane scrollPane = new ScrollPane();
         int gameMode = controller.getGameMode();
         BorderPane bPane = new BorderPane();
-
+//        scrollPane.getStylesheets().add(getClass().getResource("../css/playgame.css").toExternalForm());
+//        bPane.getStylesheets().add(getClass().getResource("../css/playgame.css").toExternalForm());
         HBox topBar = new HBox(5);
         Button quitBtn = new Button("Quit Game");
         quitBtn.setOnAction((event) -> {
@@ -566,6 +567,8 @@ public class MainView {
                 p2MarkerPane.getChildren().add(new Label("Player Marker: " + controller.getPlayerTwoMarker()));
             }
         });
+        bPane.setPadding(new Insets(15,15,15,15));
+        bPane.setMaxWidth(500);
         return bPane;
     }
 
@@ -577,7 +580,7 @@ public class MainView {
         for(int i = 0; i < 12; i++){
             if(i%4 == 0){
                 for(int j = 0; j < 3; j++)
-                    gPane.add(new Text("Board "+ (currBoard+j)), currCol++,currRow);
+                    gPane.add(new Label("Board "+ (currBoard+j)), currCol++,currRow);
             }else {
                 gPane.add(new Text(controller.getUltimateBoard(currBoard++)), currCol++, currRow);
             }

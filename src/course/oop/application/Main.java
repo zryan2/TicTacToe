@@ -15,7 +15,8 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         MainView root = new MainView();
         Scene scene = new Scene(root.getRoot(), 700, 700);
-        scene.getStylesheets().add(getClass().getResource("course/oop/css/stylesheet.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("../css/stylesheet.css").toExternalForm());
+//        setUserAgentStylesheet(STYLESHEET_CASPIAN);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

@@ -1,0 +1,32 @@
+.root{
+    -fx-background-color: linear-gradient(#95b8d1,#89b6a5,#95b8d1);
+}
+.label{
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-font-size: 16;
+}
+.radio-button{
+    -fx-text-fill: #333333;
+    -fx-font-size:16;
+    -fx-font-weight: bold;
+
+}
+.text{
+    -fx-text-fill: #333333;
+    -fx-font-size:16;
+}
+.button{
+    -fx-background-color: #406e8e;
+    -fx-text-fill: #ffff;
+    -fx-background-radius:15;
+}
+
+.scroll-pane{
+    -fx-background-color: linear-gradient(#95b8d1,#666a86, #333333,#666a86);
+}
+
+.text-field{
+    -fx-max-width: 100;
+    -fx-background-radius:15;
+}
