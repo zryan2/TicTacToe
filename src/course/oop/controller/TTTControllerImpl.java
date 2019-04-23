@@ -158,10 +158,11 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 		playerTurn = 1;
 	}
 
-	public void newGame(int boardSize){
+	public void newGame(int boardSize, int playerCount){
 		if(gameMode == 6) {
 			board = new Board(boardSize);
 			this.boardSize = boardSize;
+			this.playerCount = playerCount;
 			System.out.println("New Board Size: " + boardSize);
 		}
 	}
@@ -248,12 +249,6 @@ public class TTTControllerImpl implements TTTControllerInterface, Serializable {
 				// Ultimate Tic Tac Toe
 				ultimateBoard = new UltimateBoard(player1.getMarker(), player2.getMarker());
 				ultimateBoard.newBoard();
-				break;
-			case 4:
-				// Randomize Game Mode
-				break;
-			case 5:
-				// Rotate Game Mode
 				break;
 			case 6:
 				// n x n Game Mode

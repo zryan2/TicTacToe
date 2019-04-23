@@ -1,6 +1,7 @@
 package course.oop.view;
 
 import course.oop.controller.TTTControllerImpl;
+import javafx.animation.RotateTransition;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,6 +12,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import java.io.*;
 
@@ -253,6 +255,11 @@ public class MainView {
         VBox playerOneDisplay = setPlayerDisplay(1);
         VBox playerTwoDisplay = setPlayerDisplay(2);
 
+        Duration duration = Duration.millis(1500);
+        RotateTransition rotateTransition = new RotateTransition(duration, winnerBox);
+        rotateTransition.setByAngle(360);
+
+
         topBar.getChildren().addAll(quitBtn, winMediaView, loseMediaView);
         bPane.setTop(topBar);
         bPane.setBottom(selectionBox);
@@ -328,6 +335,9 @@ public class MainView {
                         winMedia.play();
                         bPane.setLeft(playerDisplay);
                         bPane.setBottom(winnerBox);
+                        rotateTransition.play();
+
+                        winMedia.play();
                     } else if (winnerNum == 2) { // Winner is player 2
                         winnerBox.getChildren().clear();
                         winnerBox.getChildren().addAll(p2Win, playAgainBtn);
@@ -335,7 +345,10 @@ public class MainView {
                         VBox playerDisplay = setPlayerDisplay(2);
                         bPane.setRight(playerDisplay);
                         bPane.setBottom(winnerBox);
+                        rotateTransition.play();
+
                         winMedia.play();
+
                     } else if (winnerNum == 3) { // Tie
 //                    winnerBox.getChildren().clear();
 //                    winnerBox.getChildren().addAll(new Label("It's a Tie!"), playAgainBtn);
@@ -366,6 +379,8 @@ public class MainView {
                                     VBox playerDisplay = setPlayerDisplay(2);
                                     bPane.setRight(playerDisplay);
                                     bPane.setBottom(winnerBox);
+                                    rotateTransition.play();
+
                                     loseMedia.play();
                                 }else if(controller.determineWinner() == 3){
                                     bPane.setBottom(tieBreaker(bPane, winnerBox, playAgainBtn));
@@ -597,9 +612,22 @@ public class MainView {
     public VBox boardSizeView(){
         VBox vBox = new VBox(10);
         Button backBtn= new Button("Back");
+
+        RadioButton vsPlayerBtn = new RadioButton("Vs. Players");
+        RadioButton vsComp = new RadioButton("Vs. Computer");
+        ToggleGroup modeGroup = new ToggleGroup();
+
+        vsPlayerBtn.setToggleGroup(modeGroup);
+        vsPlayerBtn.setUserData("2");
+        vsPlayerBtn.setSelected(true);
+
+        vsComp.setToggleGroup(modeGroup);
+        vsComp.setUserData("1");
+
+
         TextField boardSize = new TextField();
         Button submitBtn = new Button("Submit");
-        vBox.getChildren().addAll(backBtn, new Label("Size of Board (min. 3)"), boardSize, submitBtn);
+        vBox.getChildren().addAll(backBtn, new Label("Size of Board (min. 3)"), boardSize, vsPlayerBtn, vsComp,submitBtn);
         backBtn.setOnAction((event)->{
           root.setCenter(changeGameMode());
         });
@@ -608,11 +636,17 @@ public class MainView {
             controller.changeGameMode(6);
             String boardSizeText = boardSize.getText();
             if(boardSizeText.matches("\\d")){
-                controller.newGame(Integer.parseInt(boardSizeText));
-                root.setCenter(buildMenu());
+                int playerNum = Integer.parseInt(modeGroup.getSelectedToggle().getUserData().toString());
+                controller.newGame(Integer.parseInt(boardSizeText), playerNum);
+                if(playerNum == 2)
+                    root.setCenter(editPlayerView());
+                else
+                    root.setCenter(buildMenu());
             }
 
         });
+        vBox.setPadding(new Insets(15,15,15,15));
+        vBox.setAlignment(Pos.CENTER);
         return vBox;
     }
     public BorderPane changeGameMode(){
@@ -692,6 +726,7 @@ public class MainView {
     }
     public BorderPane getRoot(){
         Label title= new Label("Tic-Tac-Toe");
+
         root.setTop(title);
         root.setCenter(buildMenu());
         root.setAlignment(title,Pos.CENTER);

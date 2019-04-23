@@ -22,6 +22,10 @@
     -fx-background-radius:15;
 }
 
+.button:hover{
+    -fx-background-color: #FFF;
+    -fx-text-fill: #406e8e;
+}
 .scroll-pane{
     -fx-background-color: linear-gradient(#95b8d1,#666a86, #333333,#666a86);
 }
@@ -29,4 +33,9 @@
 .text-field{
     -fx-max-width: 100;
     -fx-background-radius:15;
+}
+
+.title-label{
+    -fx-font-size: 32;
+    -fx-font-family: cursive;
 }

@@ -96,7 +96,8 @@ public class Board implements Serializable {
 	    boardFilled = 0;
 	    System.out.println("Board Size: " + boardSize);
     }
-	@Override
+
+    @Override
 	public String toString() {
 		String results = new String();
 		
